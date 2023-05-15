@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "applicationId": "com.NSPi.YaskawanoQuest2",
+  "variantType": "BASE_APK",
+  "elements": [
+    {
+      "outputType": {
+        "type": "MERGED_MANIFESTS"
+      },
+      "apkData": {
+        "type": "MAIN",
+        "splits": [],
+        "versionCode": 1,
+        "versionName": "0.3",
+        "outputFile": "launcher-release.apk",
+        "fullName": "release",
+        "baseName": "release",
+        "dirName": ""
+      },
+      "path": "AndroidManifest.xml",
+      "properties": {
+        "packageId": "com.NSPi.YaskawanoQuest2",
+        "split": "",
+        "minSdkVersion": "23"
+      }
+    }
+  ]
+}

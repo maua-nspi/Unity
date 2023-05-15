@@ -1,0 +1,4 @@
+#Mon Mar 13 09:09:17 BRT 2023
+base.0=C\:\\Users\\NSPi\\Documents\\Projetos Unity\\Celula Principal Mais Leve\\Library\\Bee\\Android\\Prj\\Mono2x\\Gradle\\launcher\\build\\intermediates\\dex\\release\\mergeDexRelease\\classes.dex
+path.0=classes.dex
+renamed.0=classes.dex
