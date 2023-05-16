@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using System.Collections;
 using System.IO;
 using System.Text;
 using System.Linq;
@@ -100,6 +101,7 @@ public class Fabrica
     public List<Robo> robos = new List<Robo>();
 }
 
+
 public class JSONorganized : MonoBehaviour
 {
     [SerializeField] private string filePath = @"C:\Users\NSPi\Documents\my_folder\JSONorganized.json";
@@ -157,19 +159,21 @@ public class JSONorganized : MonoBehaviour
                 // Find all joint GameObjects for this robot and add their positions to the Point
                 Point startPoint = new Point();
                 startPoint.pointName = "Start 0";
-                startPoint.speed = 0.0f;
+                startPoint.speed = 50.0f;
                 startPoint.isLinear = false;
 
                 Transform[] children = robotObjects[i].GetComponentsInChildren<Transform>();
                 foreach (Transform child in children)
                 {
-                    if (child.CompareTag("tagJoint"))
-                    {
-                        Position position = new Position();
-                        position.rotation = child.localRotation;
-                        //position.time = 0.0f;
+                    for(int j = 1; j < 7; j++){
+                        if (child.CompareTag("tagJoint" + j))
+                        {
+                            Position position = new Position();
+                            position.rotation = child.localRotation;
+                            //position.time = 0.0f;
 
-                        startPoint.positions.Add(position);
+                            startPoint.positions.Add(position);
+                        }
                     }
                 }
 
@@ -270,14 +274,17 @@ public class JSONorganized : MonoBehaviour
             Transform[] children = robotObjects[activeRobotIndex].GetComponentsInChildren<Transform>();
             foreach (Transform child in children)
             {
-                if (child.CompareTag("tagJoint"))
-                {
-                    Position position = new Position();
-                    position.rotation = child.localRotation;
-                    //position.time = 0.0f;
+                for(int j = 1; j < 7; j++){
+                    if (child.CompareTag("tagJoint" + j))
+                    {
+                        Position position = new Position();
+                        position.rotation = child.localRotation;
+                        //position.time = 0.0f;
 
-                    newPoint.positions.Add(position);
+                        newPoint.positions.Add(position);
+                    }
                 }
+
             }
 
             // Save the updated fabrica as JSON
@@ -308,19 +315,6 @@ public class JSONorganized : MonoBehaviour
         }
 
     }
-
-/*    
-    private void createPoint()
-    {
-        // Add a new line of text to the TMP object at the current position
-        lines = pointText.text.Split('\n');
-        lines[currentLine] += "\nPoint X	MOVJ  	V=0,00";
-
-        pointText.text = string.Join("\n", lines);
-        currentLine++;
-        UpdateDisplay();
-    }
-*/
 
     //ainda tem problemas!! programs[0] e esta perdendo o indice correto ao apagar um ponto
     private void DeleteLine()
@@ -400,7 +394,7 @@ public class JSONorganized : MonoBehaviour
     }
 
     /*
-    public void PlayPrograma()
+    public void PlayProgram()
     {
         if (robotObjects[activeRobotIndex] != null)
         {
@@ -441,98 +435,7 @@ public class JSONorganized : MonoBehaviour
     }
     */
 
-    private void PlayProgram()
-    {
-        // Check for active robot
-        for (int i = 0; i < robotObjects.Length; i++)
-        {
-            Transform activeChecker = robotObjects[i].transform.Find("AroDeSelecao");
-            if (activeChecker != null && activeChecker.gameObject.activeSelf)
-            {
-                activeRobotIndex = i;
-                break;
-            }
-        }
-
-        Robo activeRobot = fabrica.robos[activeRobotIndex];
-
-        // Check for active program
-        Program activeProgram = null;
-        foreach (Program program in activeRobot.programs)
-        {
-            if (program.command.Wait)
-            {
-                continue; // Skip waiting programs
-            }
-
-            if (program.points.Any(point => point.pointName == pointText_raw))
-            {
-                activeProgram = program;
-                break;
-            }
-            activeProgram = program;
-        }
-
-        if (activeProgram == null)
-        {
-            Debug.Log("No active program found for the current point");
-            return;
-        }
-
-        // Move the robot through the positions of the current point
-        Point currentPoint = activeProgram.points.Find(point => point.pointName == pointText_raw);
-        currentPoint = activeProgram.points[2];
-        if (currentPoint == null)
-        {
-            Debug.Log("Current point not found in the active program");
-            return;
-        }
-
-        int numPositions = currentPoint.positions.Count;
-
-        if (numPositions == 0)
-        {
-            Debug.Log("No positions found for the current point");
-            return;
-        }
-
-        if (numPositions == 1)
-        {
-            // Set the robot's position and rotation to the only position in the list
-            robotObjects[activeRobotIndex].transform.rotation = currentPoint.positions[0].rotation;
-            return;
-        }
-
-        float totalTime = currentPoint.speed;
-
-        if (totalTime == 0.0f)
-        {
-            Debug.Log("Speed of current point is zero");
-            return;
-        }
-
-        float timePerStep = totalTime / (numPositions - 1);
-
-        for (int i = 0; i < numPositions - 1; i++)
-        {
-            Quaternion startRot = currentPoint.positions[i].rotation;
-            Quaternion endRot = currentPoint.positions[i + 1].rotation;
-
-            float stepTime = i * timePerStep;
-            float stepTimeNormalized = stepTime / totalTime;
-
-            robotObjects[activeRobotIndex].transform.rotation = Quaternion.Slerp(startRot, endRot, stepTimeNormalized);
-
-            // Wait for the duration of the current step
-            if (i < numPositions - 2)
-            {
-                float stepDuration = timePerStep * (1.0f - stepTimeNormalized);
-                WaitForSeconds wait = new WaitForSeconds(stepDuration);
-                //StartCoroutine(WaitAndMoveRobot(wait));
-            }
-        }
-    }
-
+    
     /*
     // Coroutine to wait for the duration of the current step and then move the robot to the next step
     private IEnumerator WaitAndMoveRobot(WaitForSeconds wait)
@@ -541,4 +444,100 @@ public class JSONorganized : MonoBehaviour
         yield return null;
     }
     */
+
+    public void PlayProgram()
+    {
+        if (robotObjects[activeRobotIndex] != null)
+        {
+            Robo robo = fabrica.robos[activeRobotIndex];
+
+            if (robo.programs.Count > 0)
+            {
+                Program program = robo.programs[0]; // current program
+
+                StartCoroutine(MoveRobot(program));
+            }
+        }
+    }
+
+    // private IEnumerator MoveRobot(Program program)
+    // {
+    //     for (int i = 0; i < program.points.Count; i++)
+    //     {
+    //         Point point = program.points[i];
+    //         float speed = point.speed;
+    //         bool isLinear = point.isLinear;
+
+    //         for (int j = 0; j < point.positions.Count; j++)
+    //         {
+    //             Transform joint = robotObjects[activeRobotIndex].transform.FindWithTag("tagJoint");
+                
+    //             if (joint != null)
+    //             {
+    //                 Quaternion startRot = joint.localRotation;
+    //                 Quaternion endRot = point.positions[j].rotation;
+
+    //                 float t = 0;
+    //                 while (t < 1)
+    //                 {
+    //                     t += Time.deltaTime / speed;
+    //                     Quaternion currentRot = Quaternion.Slerp(startRot, endRot, isLinear ? t : t);
+    //                     joint.localRotation = currentRot;
+    //                     yield return null;
+    //                 }
+
+    //                 joint.localRotation = endRot;
+    //             }
+    //         }
+    //     }
+    // }
+
+    private IEnumerator MoveRobot(Program program)
+    {
+        for (int i = 0; i < program.points.Count; i++)
+        {
+            //Debug.Log("Passando pelo ponto " + i);
+            Point point = program.points[i];
+            float speed = point.speed;
+            bool isLinear = point.isLinear;
+            for (int j = 0; j < point.positions.Count; j++)
+            {
+                //Debug.Log("Passando pela junta " + (j+1));
+                string jointTag = "tagJoint" + (j+1);
+
+                Transform joint = robotObjects[activeRobotIndex].transform.FindWithTag(jointTag);
+
+                Quaternion startRot = joint.localRotation;
+                Quaternion endRot = point.positions[j].rotation;
+
+                float t = 0;
+                while (t < 1)
+                {
+                    t += Time.deltaTime * speed/100;
+                    Quaternion currentRot = Quaternion.Slerp(startRot, endRot, isLinear ? t : 3*t);
+                    joint.localRotation = currentRot;
+                    yield return null;
+                }
+
+            }
+        }
+    }
+}
+
+public static class TransformExtensions
+{
+    public static Transform FindWithTag(this Transform parent, string tag)
+    {
+        foreach (Transform child in parent)
+        {
+            if (child.CompareTag(tag))
+                return child;
+
+            Transform result = child.FindWithTag(tag);
+            if (result != null)
+                return result;
+        }
+
+        return null;
+    }
 }
